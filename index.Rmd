@@ -17,20 +17,105 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 #Presentación
+Este documento presenta gráficos generados a partir de los datos de COVID-19 en Costa Rica compartidos por el Ministerio de Salud en [https://geovision.uned.ac.cr/oges/](https://geovision.uned.ac.cr/oges/).
+
 ## Entradas
+```{r, include=FALSE}
+library(tidyverse)
+library(plotly)
+library(DT)
+```
+
 ### Datos generales de casos
 ```{r}
-covid <- read.csv(file="05_24_22_CSV_GENERAL.csv", sep = ";")
+covid_nacional <-
+  read_delim(
+    file = "05_24_22_CSV_GENERAL.csv",
+    delim = ";",
+    col_select = c("FECHA", "positivos", "fallecidos", "RECUPERADOS", "activos")
+  )
+
+covid_cantonal_positivos <-
+  read_delim(
+    file = "05_24_22_CSV_POSITIVOS.csv",
+    delim = ";",
+    locale = locale(encoding = "WINDOWS-1252"), # esto es para resolver el problema con las tildes
+    col_select = c("canton", "24/05/2022")
+  )
 ```
 
 ## Procesamiento
 ### Opciones generales
+```{r}
+options(scipen = 7)
+```
+
 ### Curación de datos
+```{r}
+# Transformación de datos nacionales de covid-19
+covid_nacional <-
+  covid_nacional %>%
+  select(fecha = FECHA,
+         positivos,
+         fallecidos,
+         recuperados = RECUPERADOS,
+         activos) %>%
+  mutate(fecha = as.Date(fecha, format = "%d/%m/%Y"))
+
+# Transformación de casos positivos de covid-19 por cantón
+covid_cantonal_positivos <-
+  covid_cantonal_positivos %>%
+  rename(positivos = '24/05/2022')
+```
+
 ## Salidas
 ### Casos a nivel nacional
 #### Tabla
+```{r}
+# Visualización de datos nacionales de covid-19 en formato tabular
+covid_nacional %>%
+  datatable(options = list(
+    pageLength = 20,
+    language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+  ))
+```
+
 #### Gráfico de líneas
+```{r}
+# ggplot2 - gráfico de línea
+covid_nacional %>%
+  ggplot(aes(x = fecha, y = value, color = variable)) +
+  ggtitle("Casos acumulados de covid-19 en Costa Rica") +
+  xlab("Fecha") +
+  ylab("Casos") +
+  geom_line(aes(y = positivos, color = "Positivos")) +
+  geom_line(aes(y = recuperados, color = "Recuperados")) +
+  geom_line(aes(y = activos, color = "Activos")) +
+  geom_line(aes(y = fallecidos, color = "Fallecidos")) +
+  scale_colour_manual(
+    "",
+    values = c(
+      "Positivos" = "blue",
+      "Recuperados" = "green",
+      "Activos" = "red",
+      "Fallecidos" = "black"
+    )
+  )
+```
+
 ### Casos a nivel cantonal
 #### Positivos 
 ##### Tabla
+```{r}
+# Visualización de casos positivos de covid-19 por cantón en formato tabular
+covid_cantonal_positivos %>%
+  datatable(options = list(
+    pageLength = 20,
+    language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+  ))
+```
+
 ##### Gráfico de barras
+```{r}
+
+```
