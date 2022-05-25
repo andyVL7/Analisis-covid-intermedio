@@ -117,5 +117,17 @@ covid_cantonal_positivos %>%
 
 ##### Gráfico de barras
 ```{r}
-
+barplot(
+  height = covid_cantonal_positivos,
+  names.arg = format(covid_cantonal_positivos$canton),
+  ann = FALSE,
+  bty = "n", 
+  tck = 0, 
+  xaxt = "n",
+  space = 1,
+  main="Casos fallecidos por día",
+  xlab = "Fecha",
+  ylab = "Casos fallecidos",
+  col = "black"
+)
 ```
