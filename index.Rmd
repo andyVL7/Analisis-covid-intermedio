@@ -24,6 +24,7 @@ Este documento presenta gráficos generados a partir de los datos de COVID-19 en
 library(tidyverse)
 library(plotly)
 library(DT)
+library(readr)
 ```
 
 ### Datos generales de casos
@@ -117,17 +118,16 @@ covid_cantonal_positivos %>%
 
 ##### Gráfico de barras
 ```{r}
-barplot(
-  height = covid_cantonal_positivos,
-  names.arg = format(covid_cantonal_positivos$canton),
-  ann = FALSE,
-  bty = "n", 
-  tck = 0, 
-  xaxt = "n",
-  space = 1,
-  main="Casos fallecidos por día",
-  xlab = "Fecha",
-  ylab = "Casos fallecidos",
-  col = "black"
-)
+ggplot2_barras_identity <-
+covid_cantonal_positivos %>%
+  slice_max(positivos, n = 15) %>% # se seleccionan los 15 cantones con mayor cantidad de casos
+  ggplot(aes(x = reorder(canton, positivos), y = positivos)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Cantidad de casos positivos de covid-19 por cantón") +
+  xlab("Cantón") +
+  ylab("Casos positivos") +
+  coord_flip() + # se invierten los ejes para generar barras horizontales
+  theme_minimal()
+
+ggplotly(ggplot2_barras_identity) %>% config(locale = 'es')
 ```
